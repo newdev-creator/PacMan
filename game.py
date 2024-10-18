@@ -58,5 +58,60 @@ class Game(object):
         self.fantomes.add(Fantome(448, 320, 2, 0))
 
         # Ajouter les pointes sur le terrain de jeu
+        for i, row in enumerate(environment()):
+            if item != 0:
+                self.dots_group.add(Ellipse(j*32+12, i*32+12, WHITE, 8, 8))
 
+        # Charge les effets sonores
+        self.pacman_sound = pygame.mixer.Sound("pacman_sound.ogg")
+        self.game_over_sound = pygame.mixer.Sound("game_over_sound.ogg")
+
+    def process_events(self):
+        for event in pygame.event.get():
+            # Détection des actions du joueur
+            if event.type == pygame.QUIT:
+                # Si le joueur a cliqué sur quitter proposer le choix entre START, A PROPOS et QUITTER
+                return True
+            
+            self.menu.event_handler(event)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    if self.game_over and not self.about:
+                        if self.menu.state == 0:
+                            # ---- START -----
+                            self.__init__()
+                            self.game_over = False
+                        elif self.menu.state == 1:
+                            # ----- A PROPOS -----
+                            self.about = True
+                        elif self.menu.state == 2:
+                            # ----- QUITTER -----
+                            return True
+                elif event.key == pygame.K_RIGHT:
+                    self.player.move_right()
+                elif event.key == pygame.K_LEFT:
+                    self.player.move_left()
+                elif event.key == pygame.K_UP:
+                    self.player.move_up()
+                elif event.key == pygame.K_DOWN:
+                    self.player.move_down()
+                elif event.key == pygame.K_ESCAPE:
+                    self.game_over = True
+                    self.about = False
+                elif event.type == pygame.KEYUP:
+                    if event.type == pygame.K_RIGHT:
+                        self.player.stop_move_right()
+                    elif event.type == pygame.K_LEFT:
+                        self.player.stop_move_left()
+                    elif event.type == pygame.K_UP:
+                        self.player.stop_move_up()
+                    elif event.type == pygame.K_down:
+                        self.player.stop_move_down()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    self.player.explosion = True
+                    return False
+                
+    def run_logic(self):
+        
+                
 
