@@ -112,6 +112,11 @@ class Game(object):
                     return False
                 
     def run_logic(self):
-        
+        if not self.game_over:
+            self.player.update(self.horizontal_blocks, self.vertical_blocks)
+            block_hit_list = pygame.sprite.spritecollide(self.player, self.dots_group, True)
+
+            # Lorsque le block_hit_list contient un sprite, cela signifie que le joueur a touché un point
+            
                 
 
