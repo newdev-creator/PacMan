@@ -116,6 +116,7 @@ class Fantome(pygame.sprite.Sprite):
         )
         return grid
 
+    # Définition de la fonction qui dessine le terrain
     def draw_environment(screen):
         for i, row in enumerate(environment()):
             for j, item in enumerate(row):
@@ -125,4 +126,3 @@ class Fantome(pygame.sprite.Sprite):
                 elif item == 2:
                     pygame.draw.line(screen, BLUE, [j*32, i*32], [j*32, i*32+32], 3)
                     pygame.draw.line(screen, BLUE, [j*32+32, i*32], [j*32+32, i*32+32], 3)
-
