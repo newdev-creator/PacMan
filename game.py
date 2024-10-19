@@ -36,7 +36,7 @@ class Game(object):
         self.vertical_blocks = pygame.sprite.Group()
 
         # Crée un groupe de points à l'écran
-        self.dots = pygame.sprite.Group()
+        self.dots_group = pygame.sprite.Group()
 
         # Définit l'environnement
         for i, row in enumerate(environment()):
@@ -57,10 +57,11 @@ class Game(object):
         self.fantomes.add(Fantome(640, 448, 2, 0))
         self.fantomes.add(Fantome(448, 320, 2, 0))
 
-        # Ajouter les pointes sur le terrain de jeu
+        # Ajouter les points sur le terrain de jeu
         for i, row in enumerate(environment()):
-            if item != 0:
-                self.dots_group.add(Ellipse(j*32+12, i*32+12, WHITE, 8, 8))
+            for j, item in enumerate(row):
+                if item != 0:
+                    self.dots_group.add(Ellipse(j*32+12, i*32+12, WHITE, 8, 8))
 
         # Charge les effets sonores
         self.pacman_sound = pygame.mixer.Sound("pacman_sound.ogg")
@@ -98,18 +99,18 @@ class Game(object):
                 elif event.key == pygame.K_ESCAPE:
                     self.game_over = True
                     self.about = False
-                elif event.type == pygame.KEYUP:
-                    if event.type == pygame.K_RIGHT:
-                        self.player.stop_move_right()
-                    elif event.type == pygame.K_LEFT:
-                        self.player.stop_move_left()
-                    elif event.type == pygame.K_UP:
-                        self.player.stop_move_up()
-                    elif event.type == pygame.K_down:
-                        self.player.stop_move_down()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    self.player.explosion = True
-                    return False
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_RIGHT:
+                    self.player.stop_move_right()
+                elif event.key == pygame.K_LEFT:
+                    self.player.stop_move_left()
+                elif event.key == pygame.K_UP:
+                    self.player.stop_move_up()
+                elif event.key == pygame.K_DOWN:
+                    self.player.stop_move_down()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self.player.explosion = True
+                return False
                 
     def run_logic(self):
         if not self.game_over:
@@ -117,6 +118,98 @@ class Game(object):
             block_hit_list = pygame.sprite.spritecollide(self.player, self.dots_group, True)
 
             # Lorsque le block_hit_list contient un sprite, cela signifie que le joueur a touché un point
-            
-                
+            if len(block_hit_list) > 0:
+                # Déclenchement de l'effet sonore
+                self.pacman_sound.play()
+                self.score += 1
+
+            block_hit_list = pygame.sprite.spritecollide(self.player, self.fantomes, True)
+            if len(block_hit_list) > 0:
+                self.player.explosion = True
+                self.game_over_sound.play()
+                self.game_over = self.player.game_over
+
+            self.game_over = self.player.game_over
+            self.fantomes.update(self.horizontal_blocks, self.vertical_blocks)
+            # tkMessageBox.showinfo("GAME OVER !", "Score final = " + (str)(Game.score))
+            messagebox.showinfo("GAME OVER !", "Score final = " + str(self.score))
+
+    def display_frame(self, screen):
+        # Tout d'abord, effacez l'écran. N'y mettez pas d'autres commandes de dessin
+        screen.fill(BLACK)
+
+        # ----- Le code pour dessiner le terrain de jeu vient ici -----
+        if self.game_over:
+            if self.about:
+                self.display_message(screen, "C'est un jeu d'arcade")
+                # "un labyrinthe contenant divers points,\n"
+            else:
+                self.menu.display_frame(screen)
+        else:
+            # ----- Dessin du terrain de jeu -----
+            self.horizontal_blocks.draw(screen)
+            self.vertical_blocks.draw(screen)
+            draw_environment(screen)
+            self.dots_group.draw(screen)
+            self.fantomes.draw(screen)
+            screen.blit(self.player.image, self.player.rect)
+            #text = self.font.render("Score : " + str(self.score), True, RED)
+            screen.blit(text, (30, 650))
+
+            # Affiche le texte du score
+            text = self.font.render("Score : " + str(self.score), True, GREEN)
+
+            # Dessin le texte à l'écran
+            screen.blit(text, [120, 20])
+
+            # Met à jour l'écran
+            pygame.display.flip()
+
+    
+    def display_message(self, screen, message, color=(255,0,0)):
+        label = self.font.render(message, True, color)
+        # Obtenir la largueur et la hauteur de l'étiquette
+        width = label.get_width()
+        height = label.get_height()
+
+        # Détermine la position de l'étiquette sur l'écran
+        posX = (SCREEN_WIDTH / 2) - (width / 2)
+        posY = (SCREEN_HEIGHT / 2) - (height / 2)
+
+        # Dessine l'étiquette sur l'écran
+        screen.blit(label, (posX, posY))
+
+
+class Menu(object):
+    state = 0
+    def __init__(self, items, font_color=(0,0,0), select_color=(255,0,0), ttf_font=None, font_size=25):
+        self.font_color = font_color
+        self.select_color = select_color
+        self.items = items
+        self.font = pygame.font.Font(ttf_font, font_size)
+
+    def display_frame(self, screen):
+        for index, item in enumerate(self.items):
+            if self.state == index:
+                label = self.font.render(item, True, self.select_color)
+            else:
+                label = self.font.render(item, True, self.font_color)
+            width = label.get_width()
+            height = label.get_height()
+            posX = (SCREEN_WIDTH / 2) - (width / 2)
+            # t_h: total height of text block
+            t_h = len(self.items) * height
+            posY = (SCREEN_HEIGHT / 2) - (t_h / 2) + (index * height)
+            screen.blit(label, (posX, posY))
+
+    def event_handler(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                if self.state > 0:
+                    self.state -= 1
+            elif event.key == pygame.K_DOWN:
+                if self.state < len(self.items) - 1:
+                    self.state += 1
+
+                    
 
