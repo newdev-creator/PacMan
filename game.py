@@ -64,8 +64,8 @@ class Game(object):
                     self.dots_group.add(Ellipse(j*32+12, i*32+12, WHITE, 8, 8))
 
         # Charge les effets sonores
-        self.pacman_sound = pygame.mixer.Sound("pacman_sound.ogg")
-        self.game_over_sound = pygame.mixer.Sound("game_over_sound.ogg")
+        self.pacman_sound = pygame.mixer.Sound("pacman_sound.wav")
+        self.game_over_sound = pygame.mixer.Sound("game_over_sound.wav")
 
     def process_events(self):
         for event in pygame.event.get():

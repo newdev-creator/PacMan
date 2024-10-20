@@ -21,6 +21,7 @@ class Block(pygame.sprite.Sprite):
         # Définit la couleur d'arrière plan comme transparente
         self.image = pygame.Surface([width, height])
         self.image.fill(color)
+        self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
 
