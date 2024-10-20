@@ -1,46 +1,51 @@
 import pygame
 from game import Game
 
+# Constantes de jeu
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 576
+FPS = 30
 
 def main():
-    # Initialisation de tous les modules pygame importés
-    pygame.init()
+    """
+    Fonction principale du jeu Pac-Man.
+    Initialise le jeu et gère la boucle principale.
+    """
+    try:
+        # Initialisation de Pygame
+        pygame.init()
 
-    #Définit la largeur et la hauteur de l'écran [width, height]
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        # Configuration de l'écran
+        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption("Pac-Man")
 
-    # Définit le titre de la fenêtre du jeu
-    pygame.display.set_caption("Pac-Man")
+        # Initialisation du chronomètre
+        clock = pygame.time.Clock()
 
-    # Boucle jusqu'à ce que le joueur clique sur le bouton de fermeture
-    done = False
+        # Création de l'instance de jeu
+        game = Game()
 
-    # Utilisé pour gérer la vitesse de mise à jour de l'écran
-    clock = pygame.time.Clock()
+        # Boucle de jeu principale
+        running = True
+        while running:
+            # Gestion des événements
+            running = not game.process_events()  # Inverse la valeur car process_events retourne True pour quitter
 
-    # Crée un élément du jeu
-    game = Game()
+            # Mise à jour de la logique du jeu
+            game.run_logic()
 
-    # ----- Boucle de jeu principale -----
-    while not done:
-        # ----- Traite les événements (frappes au clavier, clics de souris, etc.) -----
-        done = game.process_events()
+            # Rendu de l'écran
+            game.display_frame(screen)
+            pygame.display.flip()  # Ajout de la mise à jour de l'affichage
 
-        # ----- la logique du jeu vient ici -----
-        game.run_logic()
+            # Contrôle de la fréquence d'imagesa
+            clock.tick(FPS)
 
-        # ----- Déssine l'écran du jeu -----
-        game.display_frame(screen)
-
-        # ----- Limite la vitesse d'affichage à 30 images par seconde -----
-        clock.tick(30)
-        # tkMessageBox.showinfo("GAME OVER !", "Score final = " + (str)(Game.score))
-
-        # Ferme la fenêtre et quitter
-        # Si vous oubliez cettte ligne, le programme se bloquera
-        # à la sortie si vous exécutez le programme à partir de IDLE
+    except Exception as e:
+        print(f"Une erreur est survenue : {e}")
+    
+    finally:
+        # Nettoyage et fermeture propre
         pygame.quit()
 
 if __name__ == '__main__':
